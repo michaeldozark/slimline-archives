@@ -70,10 +70,10 @@ function slimline_archives() {
 		/**
 		 * Register our custom option through the Settings API
 		 *
-		 * @link https://developer.wordpress.org/reference/hooks/admin_menu/
-		 *       Documentation of the `admin_menu` action hook
+		 * @link https://developer.wordpress.org/reference/hooks/admin_init/
+		 *       Documentation of the `admin_init` action hook
 		 */
-		add_action( 'admin_menu', 'slimline_archives_register_setting', 10 );
+		add_action( 'admin_init', 'slimline_archives_register_setting', 10 );
 
 		/**
 		 * Add our settings and fields on the Reading options page
@@ -150,11 +150,29 @@ function slimline_archives_flush_rewrite_rules() {
 
 }
 
+/**
+ * Register option so we can save it from the admin page
+ *
+ * @link  https://developer.wordpress.org/plugins/settings/using-settings-api/#add-a-setting
+ *        Documentation of how to add a setting using the Settings API
+ * @since 0.1.0
+ */
 function slimline_archives_register_setting() {
 
+	/**
+	 * Register the setting for the Reading settings group
+	 *
+	 * @link https://developer.wordpress.org/reference/functions/register_setting/
+	 *       Documentation of the `register_setting` function
+	 */
 	register_setting( 'reading', 'slimline_archives', [ 'sanitize_callback' => 'slimline_archives_sanitize_array' ] );
 }
 
+/**
+ * Custom settings sanitization
+ *
+ * @link
+ */
 function slimline_archives_sanitize_array( $options = array() ) {
 
 	return array_map( 'absint', $options );
@@ -412,6 +430,14 @@ function slimline_archives_wpseo_title( $title = '' ) {
 	return $title;
 }
 
+/**
+ * Get Yoast SEO metadesc for the post type archive page
+ *
+ * @param  string $post_type Name of the post type to get a metadescription for
+ * @return string $metadesc  Description if archive page found and description (or
+ *                           description template) is set. Empty string if not.
+ * @since  0.1.0
+ */
 function slimline_archives_get_wpseo_metadesc( $post_type = null ) {
 
 	$metadesc = '';
@@ -424,13 +450,18 @@ function slimline_archives_get_wpseo_metadesc( $post_type = null ) {
 
 		$metadesc = WPSEO_Meta::get_value( 'metadesc', $archive_page->ID );
 
+		/**
+		 * If we don't have a meta description yet, retrieve the template for the
+		 * post type. This will let us auto-generate the description based on the
+		 * page.
+		 */
 		if ( ! $metadesc ) {
 
 			$options = WPSEO_Options::get_options( array( 'wpseo' ) );
 
-			if ( isset( $options["metadesc-{$post_type}"] ) ) {
+			if ( isset( $options["metadesc-{$archive_page->post_type}"] ) ) {
 
-				$metadesc = $options["metadesc-{$post_type}"];
+				$metadesc = $options["metadesc-{$archive_page->post_type}"];
 
 			} // if ( isset( $options["metadesc-{$post_type}"] ) )
 
@@ -479,6 +510,7 @@ function slimline_archives_get_archive_page( $post_type = null ) {
 
 	return false;
 }
+
 
 function slimline_archives_get_archive_page_id( $post_type = null ) {
 
