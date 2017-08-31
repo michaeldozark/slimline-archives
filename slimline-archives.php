@@ -500,10 +500,26 @@ function slimline_archives_get_wpseo_title( $post_type = null ) {
 	return '';
 }
 
+/**
+ * Get the post object of the page assigned as the archive for a given post type
+ *
+ * @param  string       $post_type Name of the post type to search
+ * @return WP_Post|bool            Post object of page if found, FALSE if not
+ * @since  0.1.0
+ */
 function slimline_archives_get_archive_page( $post_type = null ) {
 
+	/**
+	 * Get the ID for the archive page
+	 */
 	$page_id = slimline_archives_get_archive_page_id( $post_type );
 
+	/**
+	 * If we have a page set as the post type archive, return its post object
+	 *
+	 * @link https://developer.wordpress.org/reference/functions/get_post/
+	 *       Documentation of the `get_post` function
+	 */
 	if ( $page_id ) {
 		return get_post( $page_id );
 	} // if ( $page_id )
@@ -511,15 +527,32 @@ function slimline_archives_get_archive_page( $post_type = null ) {
 	return false;
 }
 
-
+/**
+ * Get the ID for the page assigned as the archive for a given post type
+ *
+ * @param  string   $post_type Name of the post type to search
+ * @return int|bool            ID of page if found, FALSE if not
+ * @since  0.1.0
+ */
 function slimline_archives_get_archive_page_id( $post_type = null ) {
 
+	/**
+	 * Get current post type if none supplied
+	 */
 	$post_type = slimline_archives_get_archive_post_type( $post_type );
 
 	if ( $post_type ) {
 
 		$settings = slimline_archives_get_settings();
 
+		/**
+		 * If we have a page set as the post type archive, return its ID
+		 *
+		 * @link http://php.net/manual/en/function.isset.php
+		 *       Documentation of the PHP `isset` function
+		 * @link https://developer.wordpress.org/reference/functions/absint/
+		 *       Documentation of the `absint` function
+		 */
 		if ( isset( $settings[$post_type] ) ) {
 			return absint( $settings[$post_type] );
 		} // if ( isset( $settings[$post_type] ) )
