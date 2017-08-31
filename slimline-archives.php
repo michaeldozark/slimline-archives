@@ -509,34 +509,6 @@ function slimline_archives_get_wpseo_metakeywords( $post_type = null ) {
 	return wpseo_replace_vars( $keywords, $archive_page );
 }
 
-function slimline_archives_get_archive_post_type( $post_type = null ) {
-
-	if ( ! $post_type ) {
-
-		if ( is_post_type_archive() ) {
-			$post_type = get_query_var( 'post_type' );
-		} // if ( is_post_type_archive() )
-
-		if ( is_array( $post_type ) ) {
-			$post_type = reset( $post_type );
-		} // if ( is_array( $post_type ) )
-
-	} // if ( ! $post_type )
-
-	return $post_type;
-}
-
-function slimline_archives_get_wpseo_title( $post_type = null ) {
-
-	$archive_page = slimline_archives_get_archive_page( $post_type );
-
-	if ( $archive_page ) {
-		return WPSEO_Frontend::get_instance()->get_content_title( $archive_page );
-	} // if ( $archive_page )
-
-	return '';
-}
-
 /**
  * Get the post object of the page assigned as the archive for a given post type
  *
@@ -597,4 +569,70 @@ function slimline_archives_get_archive_page_id( $post_type = null ) {
 	} // if ( $post_type )
 
 	return false;
+}
+
+/**
+ *
+ * @param  WP_Post_Type|string $post_type Post type to return. Null to return current
+ *                                        post type if viewing a post type archive.
+ * @return string              $post_type Name of the post type
+ * @since  0.1.0
+ */
+function slimline_archives_get_archive_post_type( $post_type = null ) {
+
+	if ( $post_type instanceof WP_Post_Type ) {
+
+		$post_type = $post_type->name;
+
+	} elseif ( ! $post_type ) { // if ( $post_type instanceof WP_Post_Type )
+
+		/**
+		 * If currently viewing a post type archive, retrieve the current post type
+		 *
+		 * @link https://developer.wordpress.org/reference/functions/is_post_type_archive/
+		 *       Documentation of the `is_post_type_archive` function
+		 * @link https://developer.wordpress.org/reference/functions/get_query_var/
+		 *       Documentation of the `get_query_var` function
+		 */
+		if ( is_post_type_archive() ) {
+			$post_type = get_query_var( 'post_type' );
+		} // if ( is_post_type_archive() )
+
+		/**
+		 * If post type is an array, return the first value
+		 *
+		 * @link http://php.net/manual/en/function.is-array.php
+		 *       Documentation of the PHP `is_array` function
+		 * @link http://php.net/manual/en/function.reset.php
+		 *       Documentation of the PHP `reset` function
+		 */
+		if ( is_array( $post_type ) ) {
+			$post_type = reset( $post_type );
+		} // if ( is_array( $post_type ) )
+
+	} //  // if ( $post_type instanceof WP_Post_Type )
+
+	return $post_type;
+}
+
+/**
+ * Get the Yoast SEO title for a post type archive that has an assigned archive page
+ *
+ * @param  string $post_type Post type to find the title for. Default is the current
+ *                           post type if viewing a post type archive.
+ * @return string            SEO title or empty string if no title set
+ * @since  0.1.0
+ */
+function slimline_archives_get_wpseo_title( $post_type = null ) {
+
+	/**
+	 * Get current post type if none supplied
+	 */
+	$archive_page = slimline_archives_get_archive_page( $post_type );
+
+	if ( $archive_page ) {
+		return WPSEO_Frontend::get_instance()->get_content_title( $archive_page );
+	} // if ( $archive_page )
+
+	return '';
 }
