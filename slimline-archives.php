@@ -113,6 +113,12 @@ function slimline_archives() {
 	add_action( 'update_option_slimline_archives', 'slimline_archives_flush_rewrite_rules', 10 );
 
 	/**
+	 * Update titles and descriptions on archive pages
+	 */
+	add_filter( 'get_the_archive_description', 'slimline_archives_archive_description', 10, 1 );
+	add_filter( 'get_the_archive_title',       'slimline_archives_archive_title',       10, 1 );
+
+	/**
 	 * Add handling for Yoast SEO
 	 */
 	add_filter( 'wpseo_metakeywords', 'slimline_archives_wpseo_metakeywords', 1000, 1 );
@@ -145,7 +151,7 @@ function slimline_archives_add_settings_fields() {
 			]
 		);
 
-	} // foreach ( $post_types as $post_type )
+	} // foreach ( $post_types as $post_type_name => $post_type_object )
 
 }
 
@@ -184,6 +190,19 @@ function slimline_archives_archive_description( $description ) {
 	} // if ( is_post_type_archive() )
 
 	return $description;
+}
+
+function slimline_archives_archive_title( $title = '', $post_type = null ) {
+
+	$post_type = slimline_archives_get_archive_post_type( $post_type );
+
+	$settings = slimline_archives_get_settings();
+
+	if ( $post_type && isset( $settings[$post_type] ) ) {
+		$title = get_the_title( $settings[$post_type] );
+	} // if ( $post_type && isset( $settings[$post_type] ) )
+
+	return $title;
 }
 
 /**
@@ -509,17 +528,6 @@ function slimline_archives_page_select( $args ) {
 	} // foreach ( $pages as $page_id => $page_title )
 	echo '</select>';
 
-}
-
-function slimline_archives_post_type_archive_title( $title, $post_type ) {
-
-	$settings = slimline_archives_get_settings();
-
-	if ( isset( $settings[$post_type] ) ) {
-		$title = get_the_title( $settings[$post_type] );
-	} // if ( isset( $settings[$post_type] ) )
-
-	return $title;
 }
 
 function slimline_archives_post_type_rewrite_args( $post_type_object, $slug ) {
